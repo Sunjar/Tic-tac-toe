@@ -9,6 +9,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -22,7 +23,7 @@ public class Controller implements Initializable {
     private Pane base_square;
 
     @FXML
-    private Rectangle game_panel;
+    public Rectangle game_panel;
 
     private static boolean TURN = false;
 
@@ -34,16 +35,32 @@ public class Controller implements Initializable {
         game_panel.setOnMouseClicked(event -> {
             int x = (int) (event.getX() / BOUND);
             int y = (int) (event.getY() / BOUND);
-            if (refreshBoard(x, y)) {
-                TURN = !TURN;
-            }
+//            if (refreshBoard(x, y)) {
+//                System.out.println(Arrays.deepToString(chessBoard));
+//                System.out.println(Arrays.deepToString(flag));
+//            }
+            refreshBoard(x, y);
         });
     }
 
-    private boolean refreshBoard (int x, int y) {
+    public int[][] getChessBoard(){
+        return chessBoard;
+    }
+
+    public boolean[][] getFlag(){
+        return flag;
+    }
+
+    public Rectangle getGame_panel(){
+        return game_panel;
+    }
+
+    public boolean refreshBoard (int x, int y) {
         if (chessBoard[x][y] == EMPTY) {
             chessBoard[x][y] = TURN ? PLAY_1 : PLAY_2;
             drawChess();
+            System.out.println("Refresh Finished.");
+            TURN = !TURN;
             return true;
         }
         return false;
@@ -102,4 +119,44 @@ public class Controller implements Initializable {
         line_b.setStroke(Color.BLUE);
         flag[i][j] = true;
     }
+    public boolean judgeLine(){
+        for(int i = 0;i < chessBoard.length; i++)
+        {
+            if(chessBoard[i][0] == chessBoard[i][1] && chessBoard[i][1] == chessBoard[i][2] && chessBoard[i][0] > 0) return true;
+        }
+        return false;
+    }
+
+    public boolean judgeColumn(){
+        for(int j = 0;j < chessBoard.length; j++)
+        {
+            if(chessBoard[0][j] == chessBoard[1][j] && chessBoard[1][j] == chessBoard[2][j] && chessBoard[0][j] > 0) return true;
+        }
+        return false;
+    }
+
+    public boolean judgeCross(){
+        if(chessBoard[0][0] == chessBoard[1][1] && chessBoard[1][1] == chessBoard[2][2] && chessBoard[1][1] > 0) return true;
+        if(chessBoard[0][2] == chessBoard[1][1] && chessBoard[1][1] == chessBoard[2][0] && chessBoard[1][1] > 0) return true;
+        return false;
+    }
+
+    public boolean judgeWin(){
+        return judgeCross() || judgeColumn() || judgeLine();
+    }
+
+    public boolean judgeDraw(){
+        for (int i = 0; i < chessBoard.length; i++) {
+            for (int j = 0; j < chessBoard[0].length; j++) {
+                if (chessBoard[i][j] == 0) return false;
+            }
+        }
+        if(judgeWin()) return false;
+        return true;
+    }
+
+    public int getBound(){
+        return BOUND;
+    }
+
 }
