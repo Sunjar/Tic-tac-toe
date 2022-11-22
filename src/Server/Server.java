@@ -4,29 +4,23 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
 
     private ServerSocket server;
-    private int port;
-    private Socket socket = null;
     private List<Player> players;
 
     private List<Game> games;
 
-    private Link link;
-    private Match match;
     class Link implements Runnable{
 
         @Override
-        public void run()
-        {
-            while(true)
-            {
+        public void run() {
+            while(true) {
                 if(players.size() < 10) {
+                    Socket socket;
                     try {
                         socket = server.accept();
                     } catch (IOException e) {
@@ -39,7 +33,8 @@ public class Server {
                     System.out.println(player.name);
                     Thread t = new Thread(player);
                     t.start();
-                    player.send("Link");// Link means that the player(listener) has been connected to server.
+                    player.send("Link");
+                    // Link means that the player(listener) has been connected to server.
                 }
                 else{
                     try {
@@ -53,11 +48,9 @@ public class Server {
     }
 
     class Match implements Runnable{
-
         @Override
         public void run() {
-            while(true)
-            {
+            while(true) {
                 Player circle = null;
                 Player cross = null;
                 synchronized (new Match()){
@@ -74,8 +67,7 @@ public class Server {
                         }
                     }
                 }
-                if(circle != null && cross != null)
-                {
+                if(circle != null && cross != null){
                     games.add(new Game(circle, cross));
                     circle.setStatus(2);
                     cross.setStatus(2);
@@ -86,11 +78,11 @@ public class Server {
                     cross.send("Match 1");
                 }
             }
+
         }
     }
 
     class Player implements Runnable{
-
         Socket socket;
         String name;
         String rival;
@@ -113,7 +105,7 @@ public class Server {
 
         @Override
         public void run() {
-            String inputLine = null;
+            String inputLine;
             while(true){
                 try
                 {
@@ -122,11 +114,10 @@ public class Server {
                 }
                 catch (IOException e)
                 {
-//                    throw new RuntimeException(e);
+
                     System.out.println(this.name + " has accidentally disconnected.");
                     for(Player p : players){
-                        if(Objects.equals(p.name, this.rival))
-                        {
+                        if(Objects.equals(p.name, this.rival)) {
                             p.send("Disconnect");
                         }
                     }
@@ -134,21 +125,16 @@ public class Server {
                     return;
                 }
                 if(inputLine == null) continue;
-
                 if(inputLine.equals("Match")) status = 1;
-                if(inputLine.charAt(0) == 'C')
-                {
-                    for(Player p : players)
-                    {
-                        if(Objects.equals(p.name, this.rival))
-                        {
+                if(inputLine.charAt(0) == 'C') {
+                    for(Player p : players) {
+                        if(Objects.equals(p.name, this.rival)) {
                             p.send(inputLine);
                             System.out.println("The chess move has been sent to " + this.rival);
                         }
                     }
                 }
-                if(inputLine.equals("Quit"))
-                {
+                if(inputLine.equals("Quit")) {
                     System.out.println("Disconnect:" + this.name);
                     disconnect(this);
                     return;
@@ -177,7 +163,7 @@ public class Server {
 
     public void init(){
         System.out.println("Server ready.");
-        port = 8888;
+        int port = 8888;
         players = new CopyOnWriteArrayList<>();
         games = new CopyOnWriteArrayList<>();
         try{
@@ -185,9 +171,9 @@ public class Server {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        link = new Link();
+        Link link = new Link();
         Thread threadLink = new Thread(link);
-        match = new Match();
+        Match match = new Match();
         Thread threadMatch = new Thread(match);
         threadLink.start();
         threadMatch.start();
@@ -196,7 +182,6 @@ public class Server {
     class Game{
         private Player circle;
         private Player cross;
-
         public Game(Player circle, Player cross) {
             this.circle = circle;
             this.cross = cross;

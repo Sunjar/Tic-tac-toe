@@ -21,15 +21,9 @@ public class Main extends Application {
             primaryStage.setScene(new Scene(root));
             primaryStage.setResizable(false);
             primaryStage.show();
-            primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                @Override
-                public void handle(WindowEvent windowEvent) {
-                    System.exit(0);
-                }
-            });
+            primaryStage.setOnCloseRequest(windowEvent -> System.exit(0));
             System.out.println("Client ready.");
             Controller ctrl = fxmlLoader.getController();
-//            System.out.println(ctrl);
             Listener listener = new Listener(ctrl);
             Thread t = new Thread(listener);
             t.start();
